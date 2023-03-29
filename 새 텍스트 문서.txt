@@ -52,3 +52,60 @@ while True:
 # 해제
 cap.release()
 cv2.destroyAllWindows()
+
+//test2
+
+
+import cv2
+import numpy as np
+
+def find_screws(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv2.threshold(blurred, 150, 255, cv2.THRESH_BINARY)[1]
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    screws = []
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area > 50:
+            x,y,w,h = cv2.boundingRect(cnt)
+            aspect_ratio = w/h
+            if 0.8 < aspect_ratio < 1.2:
+                screws.append((x+w/2, y+h/2))
+
+    return screws
+
+def get_screws_info(screws):
+    num_screws = len(screws)
+    lengths = []
+    for i in range(num_screws):
+        for j in range(i+1, num_screws):
+            length = np.sqrt((screws[i][0]-screws[j][0])**2 + (screws[i][1]-screws[j][1])**2)
+            lengths.append(length)
+
+    return num_screws, lengths
+
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    screws = find_screws(frame)
+    num_screws, lengths = get_screws_info(screws)
+    print(f"Number of screws: {num_screws}")
+    if num_screws == 1:
+        print("통과")
+    else:
+        print("멈춰지기")
+    print(f"Lengths of screws: {lengths}")
+
+    cv2.imshow('Frame', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
