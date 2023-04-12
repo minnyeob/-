@@ -1,0 +1,113 @@
+######################2주차################################
+
+import cv2
+import numpy as np
+
+# 카메라 연결
+cap = cv2.VideoCapture(0)
+
+# 나사 인식 함수
+def detect_screw(frame):
+    # 이미지 전처리
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+
+    # 윤곽선 검출
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 나사 인식 및 측정
+    screws = []
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area > 1000 and area < 5000:
+            approx = cv2.approxPolyDP(cnt, 0.02 * cv2.arcLength(cnt, True), True)
+            if len(approx) == 6:
+                screws.append(approx)
+                cv2.drawContours(frame, [approx], -1, (0, 255, 0), 2)
+                pixel_len = np.linalg.norm(approx[1] - approx[0])
+                real_len = 20.0  # 실제 나사 길이 (mm)
+                length = pixel_len / real_len
+                cv2.putText(frame, f'{length:.2f}mm', (approx[0][0][0], approx[0][0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    
+    # 나사 개수 출력
+    screw_count = len(screws)
+    cv2.putText(frame, f'Screws: {screw_count}', (20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    
+    return frame
+
+# 메인 루프
+while True:
+    # 이미지 캡처
+    ret, frame = cap.read()
+    
+    # 나사 인식
+    frame = detect_screw(frame)
+    
+    # 화면 출력
+    cv2.imshow('Screw Detector', frame)
+    
+    # 종료 조건
+    if cv2.waitKey(1) == ord('q'):
+        break
+
+# 해제
+cap.release()
+cv2.destroyAllWindows()
+
+//test2
+
+
+import cv2
+import numpy as np
+
+def find_screws(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv2.threshold(blurred, 150, 255, cv2.THRESH_BINARY)[1]
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    screws = []
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area > 50:
+            x,y,w,h = cv2.boundingRect(cnt)
+            aspect_ratio = w/h
+            if 0.8 < aspect_ratio < 1.2:
+                screws.append((x+w/2, y+h/2))
+
+    return screws
+
+def get_screws_info(screws):
+    num_screws = len(screws)
+    lengths = []
+    for i in range(num_screws):
+        for j in range(i+1, num_screws):
+            length = np.sqrt((screws[i][0]-screws[j][0])**2 + (screws[i][1]-screws[j][1])**2)
+            lengths.append(length)
+
+    return num_screws, lengths
+
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    screws = find_screws(frame)
+    num_screws, lengths = get_screws_info(screws)
+    print(f"Number of screws: {num_screws}")
+    if num_screws == 1:
+        print("통과")
+    else:
+        print("멈춰지기")
+    print(f"Lengths of screws: {lengths}")
+
+    cv2.imshow('Frame', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
