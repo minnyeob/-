@@ -5,8 +5,6 @@
 
 ![프린터 이미지](https://user-images.githubusercontent.com/112456183/232184175-d3021435-a9b9-411d-9f29-083fd5f1cbb9.jpg){: width="50%" height="50%"}
 
-
-
 ### 조장 : 김민엽
 
 ### HardWare 팀장 : 구보승
