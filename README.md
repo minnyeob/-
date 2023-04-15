@@ -3,7 +3,8 @@
 
 ## 선정주제 : 3D프린터 출력물 불량 검사 시스템
 
-![3d프린터 사진](file:///C:/Users/user/Downloads/printer-gd7d96d5b9_1920.jpg)
+![프린터 이미지](printer-gd7d96d5b9_1920.jpg)
+
 
 ### 조장 : 김민엽
 
