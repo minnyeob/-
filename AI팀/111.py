@@ -1,98 +1,46 @@
 import cv2
-import math
 
-cap = cv2.VideoCapture(0)
+# 이미지 파일을 읽어옵니다.
+image = cv2.imread('C:\sdafsdf\cap.jpg')
 
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# 이미지의 크기를 출력합니다.
+height, width, channels = image.shape
+print("이미지 크기: {} x {} pixels, 채널 수: {}".format(width, height, channels))
 
-# 사용할 변수들 미리 정의
-FONT = cv2.FONT_HERSHEY_DUPLEX
-BLUE = (255, 0, 0)
-GREEN = (0, 255, 0)
-RED = (0, 0, 255)
-FILTER_RATIO = 0.85
+# 이미지를 회색조로 변환합니다.
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+# 블러링을 적용합니다.
+blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-# 경계선을 가져오는 함수
-def get_contours(img, min_area, is_simple=False):
-    # 근사화 방식 Simple : 경계선의 꼭짓점 좌표만 반환
-    if is_simple:
-        contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # 근사화 방식 None : 모든 경계선을 반환
-    else:
-        contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+# 가장자리를 검출합니다.
+edges = cv2.Canny(blurred, 50, 150)
 
-    result = []
+# 가장자리 이미지를 출력합니다.
+cv2.imshow('Edges', edges)
 
-    # 경계선 개수만큼 반복
-    for cnt in contours:
-        # 경계선의 너비가 최소 영역 이상일 때만 result 배열에 추가
-        if cv2.contourArea(cnt) > min_area:
-            result.append(cnt)
+# 윤곽선을 검출합니다.
+contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    return result
+print("검출된 윤곽선 수: {}".format(len(contours)))
 
+# 윤곽선을 그리고 세모를 인식합니다.
+for contour in contours:
+    perimeter = cv2.arcLength(contour, True)
+    approx = cv2.approxPolyDP(contour, 0.04 * perimeter, True)
 
-# 원형인지 여부를 반환하는 함수
-def is_circle(cnt):
-    cnt_length = cv2.arcLength(cnt, True)
-    cnt_area = cv2.contourArea(cnt)
+    if len(approx) == 3:
+        cv2.drawContours(image, [approx], 0, (0, 255, 0), 3)
 
-    # ratio가 1에 가까울수록 원형
-    ratio = 4 * math.pi * cnt_area / pow(cnt_length, 2)
+        # 인식된 세모의 중심 좌표를 계산합니다.
+        M = cv2.moments(approx)
+        cx = int(M['m10'] / M['m00'])
+        cy = int(M['m01'] / M['m00'])
 
-    if ratio > FILTER_RATIO:
-        return True
-    else:
-        return False
+        # 세모의 중심 좌표를 출력합니다.
+        cv2.putText(image, "Triangle", (cx - 40, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-
-# 꼭짓점을 그리는 함수
-def draw_points(img, cnt, epsilon, color):
-    cnt_length = cv2.arcLength(cnt, True)
-    approx = cv2.approxPolyDP(cnt, epsilon * cnt_length, True)
-
-    for point in approx:
-        cv2.circle(img, (point[0][0], point[0][1]), 3, color, -1)
-
-
-# 이미지 불러와서 필터링
-img = cv2.imread("C:/Users/Administrator/Desktop\imgs/inRange.png") #사진 저장 장소
-filter_img = cv2.inRange(img, (0, 0, 0), (255, 150, 255))
-
-# 경계선 가져오기
-contours_simple = get_contours(filter_img, 50, True)
-contours_none = get_contours(filter_img, 50, False)
-
-# 텍스트 출력하고 경계선 그리기(simple)
-simple_text = "contours count : " + str(len(contours_simple))
-simple_img = cv2.putText(img.copy(), simple_text, (0, 25), FONT, 1, RED)
-for cnt in contours_simple:
-    cv2.drawContours(simple_img, cnt, -1, BLUE, 5)
-    if is_circle(cnt):
-        # 원형일 경우 빨간색으로 그리기
-        draw_points(simple_img, cnt, 0.1, RED)
-    else:
-        # 원형이 아닐 경우 초록색으로 그리기
-        draw_points(simple_img, cnt, 0.1, GREEN)
-
-# 텍스트 출력하고 경계선 그리기(none)
-none_text = "contours count : " + str(len(contours_none))
-none_img = cv2.putText(img.copy(), none_text, (0, 25), FONT, 1, RED)
-for cnt in contours_none:
-    cv2.drawContours(none_img, cnt, -1, BLUE, 5)
-    if is_circle(cnt):
-        # 원형일 경우 빨간색으로 그리기
-        draw_points(none_img, cnt, 0.1, RED)
-    else:
-        # 원형이 아닐 경우 초록색으로 그리기
-        draw_points(none_img, cnt, 0.1, GREEN)
-
-
-# 이미지 화면에 출력
-cv2.imshow("origin image", img)
-cv2.imshow("filter image", filter_img)
-cv2.imshow("simple image", simple_img)
-cv2.imshow("none image", none_img)
+# 결과를 출력합니다.
+cv2.imshow('Image', image)
 cv2.waitKey(0)
+cv2.destroyAllWindows()
