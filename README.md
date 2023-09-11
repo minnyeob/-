@@ -5,7 +5,7 @@
 
 <img src="https://user-images.githubusercontent.com/112456183/232184175-d3021435-a9b9-411d-9f29-083fd5f1cbb9.jpg" width="40%" height="30%">
 
-[https://youtu.be/MCETvNi06Es](https://youtu.be/DbnzUZQ0t4Q)
+https://youtu.be/DbnzUZQ0t4Q
 
 ### 조장 : 김민엽
 
