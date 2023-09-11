@@ -9,8 +9,7 @@ https://youtu.be/DbnzUZQ0t4Q
 
 ### 조장 : 김민엽
 
-### HardWare 팀장 : ![image](https://github.com/minnyeob/Convergence-project/assets/112456183/edda51b5-947a-4bf7-ace0-0b60fd2c9225)
-구보승
+### HardWare 팀장 : 구보승
 > HardWare팀
 >> 임동우     
 >> 
