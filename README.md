@@ -5,11 +5,12 @@
 
 <img src="https://user-images.githubusercontent.com/112456183/232184175-d3021435-a9b9-411d-9f29-083fd5f1cbb9.jpg" width="40%" height="30%">
 
-https://youtu.be/MCETvNi06Es
+[https://youtu.be/MCETvNi06Es](https://youtu.be/DbnzUZQ0t4Q)
 
 ### 조장 : 김민엽
 
-### HardWare 팀장 : 구보승
+### HardWare 팀장 : ![image](https://github.com/minnyeob/Convergence-project/assets/112456183/edda51b5-947a-4bf7-ace0-0b60fd2c9225)
+구보승
 > HardWare팀
 >> 임동우     
 >> 
